@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consumer
+data:
+  client: |
+    from kafka import KafkaConsumer
+    import logging
+    import sys
+
+    consumer = KafkaConsumer(
+      'k8s',
+      auto_offset_reset='earliest',
+      enable_auto_commit=False,
+      bootstrap_servers=['kafka-service.kafka.svc.cluster.local:9092'])
+    
+    for m in consumer:
+      print(m.value)
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: consumer
+spec:
+  containers:
+  - name: client
+    image: python:3.8.5
+    command: ['sh', '-c', 'pip install kafka-python && python /var/static/client']
+    volumeMounts:
+      - name: static-volume
+        mountPath: /var/static
+  volumes:
+    - name: static-volume
+      configMap:
+        name: consumer
