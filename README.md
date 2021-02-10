@@ -1,7 +1,7 @@
 # Kafka & Zookeeper Kubernetes Deployment
 Following this project, you will be able to deploy, configure and use an [Apache Kafka](https://kafka.apache.org/) event streaming platform with [Apache Zookeeper](https://zookeeper.apache.org/) , for your integration and development environment easily.
 
-<img src="Apache-Kafka.png" width="99%">
+<img src="Apache-kafka.png" width="99%">
 
 > Apache Kafka is an open-source distributed event streaming platform used by thousands of companies for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications
 
