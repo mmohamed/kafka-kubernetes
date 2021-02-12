@@ -30,11 +30,11 @@ spec:
         - name: HOSTNAME_COMMAND
           value: "echo \"${HOSTNAME}.kafka-broker.kafka.svc.cluster.local\""
         - name: KAFKA_LISTENERS
-          value: "INSIDE://_{HOSTNAME_COMMAND}:9092,OUTSIDE://_{HOSTNAME_COMMAND}:9093"
-        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
-          value: INSIDE:PLAINTEXT,OUTSIDE:SSL
+          value: "SSL://_{HOSTNAME_COMMAND}:9093"
         - name: KAFKA_INTER_BROKER_LISTENER_NAME
-          value: "INSIDE"
+          value: "SSL"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "SSL://_{HOSTNAME_COMMAND}:9093"
         - name: KAFKA_SSL_KEYSTORE_LOCATION
           value: "/var/lib/kafka/ssl/kafka.keystore.jks"
         - name: KAFKA_SSL_KEYSTORE_PASSWORD
@@ -55,8 +55,6 @@ spec:
               key: truststore_password
         - name: KAFKA_SSL_ENABLED_PROTOCOLS
           value: "TLSv1.2,TLSv1.1,TLSv1"
-        - name: KAFKA_SSL_CLIENT_AUTH
-          value: "none"
         - name: KAFKA_LOG4J_OPTS
           value: "-Dlog4j.configuration=file:/opt/kafka/config/log4j.properties"
         - name: BROKER_ID_COMMAND
@@ -72,17 +70,14 @@ spec:
         - name: KAFAK_AUTO_CREATE_TOPICS_ENABLE
           value: "false"
         ports:
-        - containerPort: 9092
-          name: cluster
         - containerPort: 9093
-          name: client
         livenessProbe:
           initialDelaySeconds: 60
           exec:
             command:
             - /bin/sh
             - -c
-            - 'netstat -tulpn | grep LISTEN | grep 9092'
+            - 'netstat -tulpn | grep LISTEN | grep 9093'
         volumeMounts:
         - name: data
           mountPath: /var/lib/kafka/data
