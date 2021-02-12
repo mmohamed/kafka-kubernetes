@@ -1,1 +1,13 @@
-
+/**/*.jks
+/**/*.log
+/**/*.txt
+/**/*.pem
+/**/*.csr
+/**/*.key
+/**/*.crt
+/**/*.srl
+/**/*.cert
+/kafka/ssl/*
+!/kafka/ssl/generate-ssl.sh
+!/kafka/ssl/ssl.cnf
+/kafka/config
