@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quorum-config
+data:
+  extra-zoo.cfg: |
+    quorum.auth.enableSasl=true
+    quorum.auth.learnerRequireSasl=true
+    quorum.auth.serverRequireSasl=true
+    quorum.auth.learner.loginContext=QuorumLearner
+    quorum.auth.server.loginContext=QuorumServer
+    quorum.cnxn.threads.size=20
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zookeeper-jaas
+type: Opaque
+stringData:
+  zookeeper-jaas.conf: |-
+    QuorumServer {
+          org.apache.zookeeper.server.auth.DigestLoginModule required
+          user_zk="passcode";
+    };
+    QuorumLearner {
+          org.apache.zookeeper.server.auth.DigestLoginModule required
+          username="zk"
+          password="passcode";
+    }; 
+    Server {
+          org.apache.zookeeper.server.auth.DigestLoginModule required
+          user_kafka="passcode"
+          user_client="passcode";
+    };
+    Client {
+          org.apache.zookeeper.server.auth.DigestLoginModule required
+          username="client"
+          password="passcode";
+    };
+

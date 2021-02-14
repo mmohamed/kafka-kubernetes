@@ -1,5 +1,16 @@
 # How secure Kafka cluster with Kubernetes
 
+## ZooKeeper DIGEST autentication
+1. Generate account( one for Zookeeper nodes , another for Kafka).
+
+2. Create Secret / ConfigMap and deploy StatefuSet:
+```
+kubectl apply -f zookeeper/config.secured.yaml
+kubectl apply -f zookeeper/statefulset.secured.yaml
+# Secret for kafka
+kubectl apply -f kafka/config.secured.yaml
+```
+
 ## Kafka SSL encryption
 
 > If your want to disable the Host Name verification for some raison, you need to omit the extension parameter -ext and add empty environment variable to Kafka broker ```KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM=""``` or use Kafka helper script ```kafka-configs.sh --bootstrap-server [kafka-0].kafka-broker.kafka.svc.cluster.local:9092 --entity-type brokers --entity-name 0 --alter --add-config "listener.name.internal.ssl.endpoint.identification.algorithm="``` for every broker.
@@ -46,8 +57,8 @@ kubectl create secret generic ssl --from-literal=keystore_password=passcode --fr
 
 Update Kafka StatefulSet to mount ssl secret and broker, service configuration:
 ```bash
-kubectl apply -f statefulset.ssl.yaml
-kubectl apply -f service.ssl.yaml
+kubectl apply -f kafka/statefulset.ssl.yaml
+kubectl apply -f kafka/service.ssl.yaml
 ```
 
 5. Testing
@@ -88,6 +99,7 @@ kubectl exec -ti kafka-1 -- kafka-console-consumer.sh --bootstrap-server kafka-0
 ```
 
 6. Sources & Links:
+- https://cwiki.apache.org/confluence/display/ZOOKEEPER/Server-Server+mutual+authentication
 - https://kafka.apache.org/documentation/#security_overview
 - https://github.com/bitnami/charts/issues/1279
 - https://stackoverflow.com/questions/54903381/kafka-failed-authentication-due-to-ssl-handshake-failed

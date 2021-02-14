@@ -56,7 +56,7 @@ spec:
         - name: KAFKA_SSL_ENABLED_PROTOCOLS
           value: "TLSv1.2,TLSv1.1,TLSv1"
         - name: KAFKA_LOG4J_OPTS
-          value: "-Dlog4j.configuration=file:/opt/kafka/config/log4j.properties"
+          value: "-Dlog4j.configuration=file:/opt/kafka/config/log4j.properties -Djava.security.auth.login.config=/var/lib/kafka/jass/jaas.conf"
         - name: BROKER_ID_COMMAND
           value: "echo ${HOSTNAME##*-}"
         - name: KAFKA_ZOOKEEPER_CONNECT
@@ -84,6 +84,9 @@ spec:
         - name: ssl
           mountPath: /var/lib/kafka/ssl
           readOnly: true
+        - name: jaas
+          mountPath: /var/lib/kafka/jass
+          readOnly: true
       volumes:
       - name: ssl
         secret:
@@ -93,6 +96,9 @@ spec:
               path: kafka.keystore.jks
             - key: kafka.truststore.jks
               path: kafka.truststore.jks
+      - name: jaas
+        secret:
+          secretName: kafka-jaas
   volumeClaimTemplates:
   - metadata:
       name: data
