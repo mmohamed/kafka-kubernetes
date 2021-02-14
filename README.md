@@ -78,7 +78,7 @@ So, we need to add a DIGEST authentication layer to Zookeeper (doesn’t support
 
 Follow the [security section documentation](SECURITY.md)
 
-## 5- Sourcing
+## 6- Sourcing
 * Zookeeper Docker image : we use the [kubernetes-zookeeper @kow3ns](https://github.com/kow3ns/kubernetes-zookeeper) as base image with 2 modifications:
     * Add JVM flags to be injected in Java environment file [@see start-zookeeper.sh](zookeeper/docker/scripts/start-zookeeper)
     ```bash
@@ -104,7 +104,7 @@ Follow the [security section documentation](SECURITY.md)
     fi
     ```
 
-## 6- Tips
+## 7- Tips
 * For debugging, you can bypass the Kafka broker for topics management (kafka and ZooKeeper helpers script) :
 ```bash
 kubectl exec -ti kafka-0 -- kafka-topics.sh --create --topic k8s --zookeeper zk-cs.kafka.svc.cluster.local:2181

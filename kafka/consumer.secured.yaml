@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consumer-secured
+data:
+  client: |
+    from kafka import KafkaConsumer
+    import logging
+    import sys
+
+    logger = logging.getLogger('kafka')
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(logging.INFO)
+
+    print('Init consumer...')
+
+    consumer = KafkaConsumer(
+      'k8s',
+      security_protocol='SSL',
+      ssl_cafile='/var/ssl/ca-certs.pem',
+      ssl_certfile='/var/ssl/cert.pem',
+      ssl_check_hostname= False,
+      ssl_password='passcode',
+      bootstrap_servers=['kafka-service.kafka.svc.cluster.local:9093'])
+    
+    print('Waiting for message')
+    for message in consumer:
+      print ("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition, message.offset, message.key, message.value))
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: consumer-secured
+spec:
+  containers:
+  - name: client
+    image: python:3.8.5
+    command: ['sh', '-c', 'pip install kafka-python && python /var/static/client']
+    volumeMounts:
+      - name: static-volume
+        mountPath: /var/static
+      - name: secret-volume
+        mountPath: /var/ssl
+  volumes:
+    - name: static-volume
+      configMap:
+        name: consumer-secured
+    - name: secret-volume
+      secret:
+        secretName: client-ssl

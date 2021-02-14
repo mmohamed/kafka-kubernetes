@@ -125,15 +125,23 @@ kubectl exec -ti kafka-1 -- kafka-console-producer.sh --bootstrap-server kafka-0
 >> Hello with secured connection
 ```
 ```bash
-kubectl exec -ti kafka-1 -- kafka-console-consumer.sh --bootstrap-server kafka-0.kafka-broker.kafka.svc.cluster.local:9093 --topic k8s --consumer.config /opt/kafka/config/client.properties --from-beginning
+kubectl exec -ti kafka-1 -- kafka-console-consumer.sh --bootstrap-server kafka-0.kafka-broker.kafka.svc.cluster.local:9093 --topic k8s -consumer.config /opt/kafka/config/client.properties --from-beginning
 << Hello with secured connection
 ```
 
+Prepare Secret for client:
+```bash
+kubectl create secret generic client-ssl --from-file=ca-certs.pem=ssl/ca-cert --from-file=cert.pem=ssl/cert-signed-client
+kubectl apply -f consumer.secured.yaml
+kubectl logs consumer-secured
+```
+
+
 6. Sources & Links:
-- https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html/using_amq_streams_on_red_hat_enterprise_linux_rhel/configuring_kafka
-- https://cwiki.apache.org/confluence/display/ZOOKEEPER/Server-Server+mutual+authentication
-- https://kafka.apache.org/documentation/#security_overview
-- https://github.com/bitnami/charts/issues/1279
-- https://stackoverflow.com/questions/54903381/kafka-failed-authentication-due-to-ssl-handshake-failed
-- https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/KafkaIntegrationGuide/TLS-SSL/KafkaTLS-SSLExamplePart3ConfigureKafka.htm?tocpath=Integrating%20with%20Apache%20Kafka%7CUsing%20TLS%2FSSL%20Encryption%20with%20Kafka%7C_____7
-- https://gist.github.com/anoopl/85d869f7a85a70c6c60542922fc314a8
+- [Redhat-Kafka](https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html/using_amq_streams_on_red_hat_enterprise_linux_rhel/configuring_kafka)
+- [Confluence-Zookeeper](https://cwiki.apache.org/confluence/display/ZOOKEEPER/Server-Server+mutual+authentication)
+- [Apache-Kafka](https://kafka.apache.org/documentation/#security_overview)
+- [Bitnami-Kafka](https://github.com/bitnami/charts/issues/1279)
+- [Kafka-SSL](https://stackoverflow.com/questions/54903381/kafka-failed-authentication-due-to-ssl-handshake-failed)
+- [Vertica-Kafka-SSL](https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/KafkaIntegrationGuide/TLS-SSL/KafkaTLS-SSLExamplePart3ConfigureKafka.htm?tocpath=Integrating%20with%20Apache%20Kafka%7CUsing%20TLS%2FSSL%20Encryption%20with%20Kafka%7C_____7)
+- [Kafka-SSL](https://gist.github.com/anoopl/85d869f7a85a70c6c60542922fc314a8)
