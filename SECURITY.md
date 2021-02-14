@@ -1,10 +1,41 @@
 # How secure Kafka cluster with Kubernetes
 
-## ZooKeeper DIGEST autentication
-1. Generate account( one for Zookeeper nodes , another for Kafka).
+## ZooKeeper DIGEST authentication
+1. Edit account configuration (one for Zookeeper nodes, another for Kafka broker) in [config.secured.yaml](zookeeper/config.secured.yaml) file.
+
+> Client section will be used by zkCli.sh helper srcipt to test configuration. In integration environement, Client section must be removed.
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zookeeper-jaas
+type: Opaque
+stringData:
+  zookeeper-jaas.conf: |-
+    QuorumServer {
+          org.apache.zookeeper.server.auth.DigestLoginModule required
+          user_zk="passcode";
+    };
+    QuorumLearner {
+          org.apache.zookeeper.server.auth.DigestLoginModule required
+          username="zk"
+          password="passcode";
+    }; 
+    Server {
+          org.apache.zookeeper.server.auth.DigestLoginModule required
+          user_kafka="passcode"
+          user_client="passcode";
+    };
+    Client {
+          org.apache.zookeeper.server.auth.DigestLoginModule required
+          username="client"
+          password="passcode";
+    };
+```
 
 2. Create Secret / ConfigMap and deploy StatefuSet:
-```
+```bash
 kubectl apply -f zookeeper/config.secured.yaml
 kubectl apply -f zookeeper/statefulset.secured.yaml
 # Secret for kafka
@@ -99,6 +130,7 @@ kubectl exec -ti kafka-1 -- kafka-console-consumer.sh --bootstrap-server kafka-0
 ```
 
 6. Sources & Links:
+- https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html/using_amq_streams_on_red_hat_enterprise_linux_rhel/configuring_kafka
 - https://cwiki.apache.org/confluence/display/ZOOKEEPER/Server-Server+mutual+authentication
 - https://kafka.apache.org/documentation/#security_overview
 - https://github.com/bitnami/charts/issues/1279

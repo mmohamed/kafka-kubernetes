@@ -15,7 +15,7 @@ Following this project, you will be able to deploy, configure and use an [Apache
 * Docker : **19.03.5 / 19.03.8**
 * Zookeeper : **3.4.10**
 * Kafka : **2.7.0 (Scala 2.13 / Glib 2.31-r0)**
-* Kube namespace : **kafka**
+* Kube namespace : **kafka** *(if you use a different namespace, it must be changed in service and pod hostnames)*
 * Architecture : **AMD64 / ARM64**
 * Python (optional, for client testing) : **3.8**
 
@@ -72,11 +72,30 @@ kubectl exec -ti dev-brocker -- kafka-console-producer.sh --topic=dev-k8s --boot
 << I'm a Producer
 ```
 
+## 5- Secure your Kafka
+With a standard Kafka setup, any user or application can write any messages to any topic. It's the same for Zookeeper.
+So, we need to add a DIGEST authentication layer to Zookeeper (doesn’t support ACL, but we have only Kafka broker as client, DIGEST is sufficient) to authorize only Kafka broker. In Kafka Side we need to add SSL authentication to authorize ony valid client to use services.
+
+Follow the [security section documentation](SECURITY.md)
+
 ## 5- Sourcing
-* Zookeeper Docker image : we use the [kubernetes-zookeeper @kow3ns](https://github.com/kow3ns/kubernetes-zookeeper) as base image.
-* Kafka Docker image : we use the [kafka-docker @wurstmeister](https://github.com/wurstmeister/kafka-docker) as base with little modifications :
+* Zookeeper Docker image : we use the [kubernetes-zookeeper @kow3ns](https://github.com/kow3ns/kubernetes-zookeeper) as base image with 2 modifications:
+    * Add JVM flags to be injected in Java environment file [@see start-zookeeper.sh](zookeeper/docker/scripts/start-zookeeper)
+    ```bash
+    echo "JVMFLAGS=\"-Xmx$HEAP -Xms$HEAP $JVMFLAGS\"" >> $JAVA_ENV_FILE
+    ```
+    * Extra configuration file path, to be injected in top  on configuration file [@see start-zookeeper.sh](zookeeper/docker/scripts/start-zookeeper)
+    ```bash
+    # Add extra configuration from file (file path in env : EXTRA_CONFIG_FILE) 
+    if [[ -n "$EXTRA_CONFIG_FILE" ]]; then
+        echo "#Start extra-section" >> $CONFIG_FILE
+        cat $EXTRA_CONFIG_FILE >> $CONFIG_FILE
+        echo "#End of extra-section" >> $CONFIG_FILE
+    fi
+    ```
+* Kafka Docker image : we use the [kafka-docker @wurstmeister](https://github.com/wurstmeister/kafka-docker) as base with 2 modifications :
     * For ARM64 arch, switching base image from 'openjdk:8u212-jre-alpine' to 'openjdk:8u201-jre-alpine' to prevent container core dump [@see issue](https://github.com/openhab/openhab-docker/issues/233).
-    * For K8S deployment, add a 'KAFKA_LISTENERS_COMMAND' environment parameter to build 'KAFKA_LISTENERS' on fly (to use pod hostname when container started) [@see start_kafka.sh](kafka/docker/start_kafka.sh)
+    * For K8S deployment, add a 'KAFKA_LISTENERS_COMMAND' environment parameter to build 'KAFKA_LISTENERS' on fly (to use pod hostname when container started) [@see start-kafka.sh](kafka/docker/start-kafka.sh)
     ```docker
     if [[ -n "$KAFKA_LISTENERS_COMMAND" ]]; then
         KAFKA_LISTENERS=$(eval "$KAFKA_LISTENERS_COMMAND")
