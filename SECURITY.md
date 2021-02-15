@@ -1,4 +1,4 @@
-# How secure Kafka cluster with Kubernetes
+# How simply secure Kafka cluster with Kubernetes
 
 ## ZooKeeper DIGEST authentication
 1. Edit account configuration (one for Zookeeper nodes, another for Kafka broker) in [config.secured.yaml](zookeeper/config.secured.yaml) file.
@@ -63,7 +63,7 @@ keytool -keystore kafka.server.truststore.jks -alias CARoot -import -file ca-cer
 keytool -keystore kafka.client.truststore.jks -alias CARoot -import -file ca-cert
 ```
 
-3. Sign the key store (with passcode and ssl.cnf configuration file)
+4. Sign the key store (with passcode and ssl.cnf configuration file)
 > You need to update alt_names section of ssl.cnf with list of your brokers hostname.
 ```bash
 keytool -keystore kafka.server.keystore.jks -alias localhost -certreq -file cert-file
@@ -72,7 +72,7 @@ keytool -keystore kafka.server.keystore.jks -alias CARoot -import -file ca-cert
 keytool -keystore kafka.server.keystore.jks -alias localhost -import -file cert-signed
 ```
 
-4. Sign the client keystore
+5. Sign the client keystore
 ```bash
 keytool -keystore kafka.client.keystore.jks -alias localhost -certreq -file cert-file-client
 openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file-client -out cert-signed-client -days 365 -CAcreateserial -passin pass:passcode -extfile ssl.cnf -extensions req_ext
@@ -80,7 +80,7 @@ keytool -keystore kafka.client.keystore.jks -alias CARoot -import -file ca-cert
 keytool -keystore kafka.client.keystore.jks -alias localhost -import -file cert-signed-client
 ```
 
-4. Kafka SSL Kubernetes
+6. Kafka SSL Kubernetes
 Create kubernetes secret from kafka.keystore.jks and kafka.truststore.jks :
 ```bash
 kubectl create secret generic ssl --from-literal=keystore_password=passcode --from-file=kafka.keystore.jks=ssl/kafka.server.keystore.jks --from-literal=truststore_password=passcode --from-file=kafka.truststore.jks=ssl/kafka.server.truststore.jks
@@ -92,7 +92,7 @@ kubectl apply -f kafka/statefulset.ssl.yaml
 kubectl apply -f kafka/service.ssl.yaml
 ```
 
-5. Testing
+7. Testing
 
 Use openssl to debug connectionto valid certificate data:
 ```bash
@@ -137,7 +137,7 @@ kubectl logs consumer-secured
 ```
 
 
-6. Sources & Links:
+8. Sources & Links:
 - [Redhat-Kafka](https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html/using_amq_streams_on_red_hat_enterprise_linux_rhel/configuring_kafka)
 - [Confluence-Zookeeper](https://cwiki.apache.org/confluence/display/ZOOKEEPER/Server-Server+mutual+authentication)
 - [Apache-Kafka](https://kafka.apache.org/documentation/#security_overview)
